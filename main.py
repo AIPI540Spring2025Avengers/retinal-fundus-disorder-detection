@@ -117,7 +117,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20
         val_losses.append(val_loss)
         val_acc.append(val_correct / val_total)
 
-        print(f"Epoch [{epoch+1}/{epochs}], Train Loss: {train_loss:.4f}, Train Acc: {train_acc[-1]:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc[-1]:.4f}")
+        print("Epoch [{}/{}], Train Loss: {:.4f}, Train Acc: {:.4f}, Val Loss: {:.4f}, Val Acc: {:.4f}".format(epoch+1, epochs, train_loss, train_acc[-1], val_loss, val_acc[-1]))
 
     return train_losses, val_losses, train_acc, val_acc
 
