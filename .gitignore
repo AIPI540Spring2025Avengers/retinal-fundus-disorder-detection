@@ -26,6 +26,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Add gcloud folder to ignore
+gcloud compute tpus tpu-vm create aipi-540-module-cv --zone=us-central1-a --accelerator-type=v3-8 --version=tpu-ubuntu2204-base/
+gcloud version/
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
