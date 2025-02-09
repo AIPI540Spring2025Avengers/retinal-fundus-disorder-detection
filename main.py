@@ -17,9 +17,9 @@ NAIVE_CLASS_NAMES = [
 ]
 
 DL_CLASS_NAMES = [
-    'Dry AMD', 'Wet AMD', 'Mild DR', 'Moderate DR', 'Severe DR',
-    'Proliferate DR', 'Cataract', 'Hypersensitive Retinopathy',
-    'Pathological Myopia', 'Glaucoma', 'Normal Fundus'
+    '1.Dry AMD', '2.Wet AMD', '3.Mild DR', '4.Moderate DR', '5.Severe DR',
+    '6.Proliferate DR', '7.Cataract', '8.Hypersensitive Retinopathy',
+    '9.Pathological Myopia', '10.Glaucoma', '11.Normal Fundus'
 ]
 
 class TraditionalModelHandler:
@@ -172,16 +172,24 @@ def main():
             display_probability_grid(dl_probs, DL_CLASS_NAMES)
 
 def display_probability_grid(probs: np.ndarray, class_names: list):
-    """Display probabilities in a 3x4 grid layout"""
-    for i in range(0, len(class_names), 4):
+    """Display probabilities in numerical order based on label prefixes"""
+    # Extract numerical prefixes and sort
+    sorted_pairs = sorted(
+        zip(class_names, probs),
+        key=lambda x: int(x[0].split('.')[0])  # Split on first . and convert to int
+    )
+    
+    # Display in grid
+    for i in range(0, len(sorted_pairs), 4):
         cols = st.columns(4)
         for j in range(4):
             idx = i + j
-            if idx < len(class_names):
+            if idx < len(sorted_pairs):
+                class_name, prob = sorted_pairs[idx]
                 with cols[j]:
                     st.metric(
-                        label=class_names[idx],
-                        value=f"{probs[idx]:.2%}"
+                        label=class_name,
+                        value=f"{prob:.2%}"
                     )
 
 if __name__ == "__main__":
