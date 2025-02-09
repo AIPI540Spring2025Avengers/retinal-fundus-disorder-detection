@@ -82,9 +82,12 @@ def main():
     # Save model
     os.makedirs(MODEL_DIR, exist_ok=True)
     model_path = os.path.join(MODEL_DIR, "TRADML_model.pkl")
+    encoder_path = os.path.join(MODEL_DIR, "TRADML_encoder.pkl")
     with open(model_path, "wb") as f:
         pickle.dump(pipeline, f)
-    print(f"Model saved to {model_path}")
+    with open(encoder_path, "wb") as f:
+        pickle.dump(le, f)
+    print(f"Model and label encoder saved to {model_path}")
 
 
 # MAIN FUNCTION
