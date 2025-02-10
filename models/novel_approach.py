@@ -64,12 +64,13 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
     # Load pretrained EfficientNetB4
-    base_model = models.vit_b_16(weights=models.ViT_B_16_Weights.IMAGENET1K_V1)
-    base_model.heads = nn.Sequential(
-    nn.Linear(base_model.heads.head.in_features, 128),
+    base_model = models.efficientnet_b4(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
+    base_model.classifier = nn.Sequential(
+    nn.BatchNorm1d(576),
+    nn.Linear(576, 128),
     nn.ReLU(),
-    nn.Dropout(0.3),
-    nn.Linear(128, 2)
+    nn.Dropout(0.7),
+    nn.Linear(128, 11)
 )
     model = base_model.to(device)
 
