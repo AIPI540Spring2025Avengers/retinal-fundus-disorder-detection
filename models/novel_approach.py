@@ -6,9 +6,10 @@ import torchvision
 import torchvision.transforms as transforms
 from torchvision import models, datasets
 from torch.utils.data import DataLoader
+
 import torch
-import torch_xla
-import torch_xla.core.xla_model as xm
+#import torch_xla
+#import torch_xla.core.xla_model as xm
 import os
 
 def main():
@@ -16,8 +17,8 @@ def main():
     # Set device
     print("CUDA Available:", torch.cuda.is_available())
     print("MPS Available:", torch.backends.mps.is_available())  # For Mac M1/M2 users
-    #device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    device = xm.xla_device()
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    #device = xm.xla_device()
     print("Current Device:", device)
 
     import kagglehub
@@ -52,10 +53,10 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
     # Load pretrained EfficientNetB4
-    base_model = models.efficientnet_b4(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
+    base_model = models.alexnet(weights=models.AlexNet_Weights.IMAGENET1K_V1)
     base_model.classifier = nn.Sequential(
-        nn.BatchNorm1d(1792),
-        nn.Linear(1792, 256),
+        nn.BatchNorm1d(9216),
+        nn.Linear(9216, 256),
         nn.ReLU(),
         nn.Dropout(0.45),
         nn.Linear(256, 11)  # Output classes = 11
@@ -65,17 +66,19 @@ def main():
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adamax(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.01)
+
 
     # Train the model
-    train_losses, val_losses, train_acc, val_acc = train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20)
+    train_losses, val_losses, train_acc, val_acc = train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs=20)
 
     # Save the model
     torch.save(model.state_dict(), "efficientnet_b4_retinal.pth")
     print("Model saved as efficientnet_b4_retinal.pth")
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20):
-    #device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    device = xm.xla_device()
+def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs=20):
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    #device = xm.xla_device()
     print("Training on: ", device)
 
     train_losses, val_losses = [], []
@@ -92,7 +95,9 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20
             outputs = model(images)
             loss = criterion(outputs, labels)
             loss.backward()
-            xm.optimizer_step(optimizer)
+            optimizer.step()
+            scheduler.step()
+            #xm.optimizer_step(optimizer)
 
             running_loss += loss.item() * images.size(0)
             _, preds = torch.max(outputs, 1)
