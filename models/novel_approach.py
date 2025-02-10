@@ -36,16 +36,27 @@ def main():
     val_path = path + '/Retinal Fundus Images/val'
 
     # Data transformations
-    transform = transforms.Compose([
+    train_transform = transforms.Compose([
+        transforms.RandomResizedCrop(IMAGE_SIZE, scale=(0.8, 1.0)),  # Crop and resize randomly
+        transforms.RandomHorizontalFlip(),  # Flip 50% of the time
+        transforms.RandomRotation(20),  # Rotate image
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Modify brightness & contrast
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),  # Small shifts
+        transforms.GaussianBlur(kernel_size=(5, 5)),  # Slight blurring
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Normalize like ImageNet
+    ])
+
+    test_transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
     # Load datasets
-    train_dataset = datasets.ImageFolder(root=train_path, transform=transform)
-    val_dataset = datasets.ImageFolder(root=val_path, transform=transform)
-    test_dataset = datasets.ImageFolder(root=test_path, transform=transform)
+    train_dataset = datasets.ImageFolder(root=train_path, transform=train_transform)
+    val_dataset = datasets.ImageFolder(root=val_path, transform=test_transform)
+    test_dataset = datasets.ImageFolder(root=test_path, transform=test_transform)
 
     # Data loaders
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
