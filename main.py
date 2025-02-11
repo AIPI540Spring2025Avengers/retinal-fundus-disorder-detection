@@ -17,9 +17,9 @@ NAIVE_CLASS_NAMES = [
 ]
 
 DL_CLASS_NAMES = [
-    '1.Dry AMD', '2.Wet AMD', '3.Mild DR', '4.Moderate DR', '5.Severe DR',
+    '1.Dry AMD', '10.Glaucoma', '11.Normal Fundus', '2.Wet AMD', '3.Mild DR', '4.Moderate DR', '5.Severe DR',
     '6.Proliferate DR', '7.Cataract', '8.Hypersensitive Retinopathy',
-    '9.Pathological Myopia', '10.Glaucoma', '11.Normal Fundus'
+    '9.Pathological Myopia'
 ]
 
 class TraditionalModelHandler:
@@ -87,15 +87,15 @@ class DeepLearningModelHandler:
         Args:
             model_path: Path to saved PyTorch model weights
         """
-        self.model = models.efficientnet_b4()
+        self.model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.IMAGENET1K_V1)
         self.model.classifier = nn.Sequential(
-            nn.BatchNorm1d(1792),
-            nn.Linear(1792, 256),
+            nn.BatchNorm1d(576),
+            nn.Linear(576, 128),
             nn.ReLU(),
             nn.Dropout(0.45),
-            nn.Linear(256, 11)
+            nn.Linear(128, 11)
         )
-        self.model.load_state_dict(torch.load(model_path))
+        self.model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
         self.model.eval()
         
         self.transform = transforms.Compose([
@@ -131,7 +131,7 @@ def load_traditional_model_handler():
 @st.cache_resource
 def load_deep_learning_model_handler():
     """Loads and caches the deep learning model handler."""
-    return DeepLearningModelHandler('models/efficientnet_b4_retinal.pth')
+    return DeepLearningModelHandler('models/mobilenetv3.pth')
 
 def main():
     """Main Streamlit application"""
