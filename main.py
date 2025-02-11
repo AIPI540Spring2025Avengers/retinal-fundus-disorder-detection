@@ -87,7 +87,7 @@ class DeepLearningModelHandler:
         Args:
             model_path: Path to saved PyTorch model weights
         """
-        self.model = models.mobilenet_v3_small()
+        self.model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.IMAGENET1K_V1)
         self.model.classifier = nn.Sequential(
             nn.BatchNorm1d(576),
             nn.Linear(576, 128),
