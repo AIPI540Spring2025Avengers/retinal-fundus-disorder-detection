@@ -88,3 +88,8 @@ def main():
 # MAIN FUNCTION
 if __name__ == "__main__":
     main()
+
+
+## ChatGPT-4o was used to produce above code on 2/6/25.
+## Goal was to reorganize previous code notebook into an organized and modular script format
+## Prompt was "turn this notebook into a cohesive and organized script"
