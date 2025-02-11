@@ -2,12 +2,11 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, precision_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 
 # CONFIGURATION
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))  # Script location
@@ -44,50 +43,74 @@ def build_pipeline():
         ('svm', SVC(kernel='rbf', C=20.0, gamma='scale', class_weight='balanced', probability=True, random_state=RANDOM_STATE))
     ])
 
-# TRAINING AND EVALUATION
+
+# TRAINING AND EVALUATION FUNCTION
+def train_and_evaluate(X_train, y_train, X_test, y_test, round_name, le=None):
+    """Trains and evaluates the model."""
+    # Train model
+    pipeline = build_pipeline()
+    pipeline.fit(X_train, y_train)
+
+    # Predict on test set
+    y_pred = pipeline.predict(X_test)
+
+    # Evaluation
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"\nModel Evaluation ({round_name}):")
+    print(f"Accuracy: {accuracy:.4f}")
+
+    # Print classification report if label encoder is provided
+    if le:
+        print(classification_report(y_test, y_pred, target_names=le.classes_))
+
+    return pipeline, y_pred
+
+# MAIN FUNCTION
 def main():
     """Loads data, trains the model, evaluates, and saves the trained model."""
-    # Load training & validation data
+    
+    # Load datasets
     X_train, y_train = load_features("train")
     X_val, y_val = load_features("val")
+    X_test, y_test = load_features("test")
 
     # Encode labels
     le = LabelEncoder()
     y_train = le.fit_transform(y_train)
-    y_val = le.transform(y_val)  
+    y_val = le.transform(y_val)
+    y_test = le.transform(y_test)
 
-    # Train the model
-    print("Training model...")
-    pipeline = build_pipeline()
-    pipeline.fit(X_train, y_train)
+    # Train on train set → Evaluate on val
+    print("\nTraining on train set...")
 
-    # Evaluate
-    y_pred = pipeline.predict(X_val)
-    
-    accuracy = accuracy_score(y_val, y_pred)
-    precision = precision_score(y_val, y_pred, average='weighted')
-    
-    print("\nModel Evaluation:")
-    print(f"Accuracy: {accuracy:.4f}")
-    print(f"Precision: {precision:.4f}")
-    print(classification_report(y_val, y_pred, target_names=le.classes_))
-    
-    cm = confusion_matrix(y_val, y_pred)
+    train_and_evaluate(X_train, y_train, X_val, y_val, "Train → Val", le)
+
+    # Retrain on train + val → Evaluate on test
+    print("\nRetraining on train + val set...")
+    X_train_val = np.concatenate([X_train, X_val])
+    y_train_val = np.concatenate([y_train, y_val])
+
+    final_pipeline, y_pred_test = train_and_evaluate(X_train_val, y_train_val, X_test, y_test, "Train+Val → Test", le)
+
+    # Print confusion matrix
+    print("\nFinal Confusion Matrix:")
+    cm = confusion_matrix(y_test, y_pred_test)
     ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le.classes_).plot(cmap="Blues", xticks_rotation=90)
     plt.show()
 
-    
-    # Save model
+    # Save final model
     os.makedirs(MODEL_DIR, exist_ok=True)
     model_path = os.path.join(MODEL_DIR, "TRADML_model.pkl")
     encoder_path = os.path.join(MODEL_DIR, "TRADML_encoder.pkl")
+    
     with open(model_path, "wb") as f:
-        pickle.dump(pipeline, f)
+        pickle.dump(final_pipeline, f)
     with open(encoder_path, "wb") as f:
         pickle.dump(le, f)
-    print(f"Model and label encoder saved to {MODEL_DIR}")
 
-# MAIN FUNCTION
+    print(f"Final model and encoder saved at: {MODEL_DIR}")
+
+# RUN MAIN FUNCTION
 if __name__ == "__main__":
     main()
 
