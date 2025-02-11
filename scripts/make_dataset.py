@@ -1,3 +1,0 @@
-'''
-script to get data
-'''
