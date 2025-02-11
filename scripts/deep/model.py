@@ -1,6 +1,7 @@
 '''
 script to train model and predict
 '''
+
 import numpy as np
 import torch
 import torch.nn as nn
