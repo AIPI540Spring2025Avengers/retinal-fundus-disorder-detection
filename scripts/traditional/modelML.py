@@ -15,8 +15,6 @@ PROCESSED_DIR = os.path.join(SCRIPT_DIR, "..", "..", "data", "processed")  # Pro
 MODEL_DIR = os.path.join(SCRIPT_DIR, "..", "..", "models")  # Directory to save model
 RANDOM_STATE = 42
 
-os.makedirs(MODEL_DIR, exist_ok=True)
-
 # LOAD DATA
 def load_features(split):
     """Loads features and labels from preprocessed dataset."""
