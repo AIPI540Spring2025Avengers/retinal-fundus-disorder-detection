@@ -10,7 +10,7 @@ from skimage.feature import local_binary_pattern
 DATA_PATH = os.path.join("data", "raw")  # Raw dataset location
 OUTPUT_DIR = os.path.join("data", "processed")  # Processed dataset location
 IMG_SIZE = (512, 512)  # Resize images 
-SAMPLES_PER_CLASS = 250  # class samples
+SAMPLES_PER_CLASS = 300  # class samples
 
 FEATURE_PARAMS = {
     'color_bins': 64,
@@ -107,3 +107,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+## ChatGPT-4o was used to produce above code on 2/6/25.
+## Goal was to reorganize previous code notebook into an organized and modular script format
+## Prompt was "turn this notebook into a cohesive and organized script"
