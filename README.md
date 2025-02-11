@@ -58,3 +58,7 @@ This repository uses the [Retinal Fundus Images](https://www.kaggle.com/datasets
 ## Canva Presentation
 
 View our Canva presentation [HERE](https://www.canva.com/design/DAGecblSyBM/Y-as2fyST6t9cdKNydDN_Q/view?utm_content=DAGecblSyBM&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb1292d3d79).
+
+## Streamlit Application
+
+Access our Streamlit application [HERE](https://aipi540-sp2025-avengers-retinal-fundus-detection.streamlit.app/).
