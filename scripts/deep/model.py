@@ -150,7 +150,7 @@ def main():
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-    train_dataset = datasets.ImageFolder(root=train_path, transform=traint_transform)
+    train_dataset = datasets.ImageFolder(root=train_path, transform=train_transform)
     val_dataset = datasets.ImageFolder(root=val_path, transform=test_transform)
     test_dataset = datasets.ImageFolder(root=test_path, transform=test_transform)
 
@@ -160,12 +160,12 @@ def main():
 
     base_model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.IMAGENET1K_V1)
     base_model.classifier = nn.Sequential(
-    nn.BatchNorm1d(576),
-    nn.Linear(576, 128),
-    nn.ReLU(),
-    nn.Dropout(0.45),
-    nn.Linear(128, 11)
-)
+        nn.BatchNorm1d(576),
+        nn.Linear(576, 128),
+        nn.ReLU(),
+        nn.Dropout(0.45),
+        nn.Linear(128, 11)
+    )
     model = base_model.to(device)
 
     criterion = nn.CrossEntropyLoss()
