@@ -17,9 +17,9 @@ NAIVE_CLASS_NAMES = [
 ]
 
 DL_CLASS_NAMES = [
-    '1.Dry AMD', '2.Wet AMD', '3.Mild DR', '4.Moderate DR', '5.Severe DR',
+    '1.Dry AMD', '10.Glaucoma', '11.Normal Fundus', '2.Wet AMD', '3.Mild DR', '4.Moderate DR', '5.Severe DR',
     '6.Proliferate DR', '7.Cataract', '8.Hypersensitive Retinopathy',
-    '9.Pathological Myopia', '10.Glaucoma', '11.Normal Fundus'
+    '9.Pathological Myopia'
 ]
 
 class TraditionalModelHandler:
