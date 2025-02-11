@@ -194,3 +194,7 @@ def display_probability_grid(probs: np.ndarray, class_names: list):
 
 if __name__ == "__main__":
     main()
+
+## Above code generated using the DeepSeek R1 model in Perplexity, and then tweaked. 
+## The prompt provided the model training code for the three models and requested a Streamlit application which would take an image upload
+## from the user and then run the three models. Subsequent prompting iterations corrected label decoding inconsistencies between the models.
