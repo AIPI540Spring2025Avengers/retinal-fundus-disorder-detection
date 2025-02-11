@@ -7,7 +7,7 @@ from skimage.feature import local_binary_pattern
 
 # CONFIGURATION
 
-DATA_PATH = os.path.join("data", "raw", "Retinal Fundus Images")  # Raw dataset location
+DATA_PATH = os.path.join("data", "raw")  # Raw dataset location
 OUTPUT_DIR = os.path.join("data", "processed")  # Processed dataset location
 IMG_SIZE = (512, 512)  # Resize images 
 SAMPLES_PER_CLASS = 300  # class samples
@@ -107,7 +107,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 ## ChatGPT-4o was used to produce above code on 2/6/25.
 ## Goal was to reorganize previous code notebook into an organized and modular script format
