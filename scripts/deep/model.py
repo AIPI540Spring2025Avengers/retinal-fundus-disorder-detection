@@ -9,37 +9,28 @@ import torchvision
 import torchvision.transforms as transforms
 from torchvision import models, datasets
 from torch.utils.data import DataLoader
+import kagglehub
 
-import torch
-#import torch_xla
-#import torch_xla.core.xla_model as xm
-import os
 
 def main():
     print("Starting the script...")
     # Set device
     print("CUDA Available:", torch.cuda.is_available())
-    print("MPS Available:", torch.backends.mps.is_available())  # For Mac M1/M2 users
+    print("MPS Available:", torch.backends.mps.is_available())
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    #device = xm.xla_device()
     print("Current Device:", device)
 
-    import kagglehub
-
-    # Download latest version
     path = kagglehub.dataset_download("kssanjaynithish03/retinal-fundus-images")
 
     print("Path to dataset files", path)
 
-    # Image size and paths
     IMAGE_SIZE = 224
-    BATCH_SIZE = 32 # try smaller
+    BATCH_SIZE = 32 
 
     train_path = path + '/Retinal Fundus Images/train'
     test_path = path + '/Retinal Fundus Images/test'
     val_path = path + '/Retinal Fundus Images/val'
 
-    # Data transformations
     train_transform = transforms.Compose([
         transforms.RandomResizedCrop(IMAGE_SIZE, scale=(0.8, 1.0)),  # Crop and resize randomly
         transforms.RandomHorizontalFlip(),  # Flip 50% of the time
@@ -57,17 +48,14 @@ def main():
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-    # Load datasets
     train_dataset = datasets.ImageFolder(root=train_path, transform=train_transform)
     val_dataset = datasets.ImageFolder(root=val_path, transform=test_transform)
     test_dataset = datasets.ImageFolder(root=test_path, transform=test_transform)
 
-    # Data loaders
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
-    # Load pretrained EfficientNetB4
     base_model = models.efficientnet_b4(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
     base_model.classifier = nn.Sequential(
     nn.BatchNorm1d(1792),
@@ -78,21 +66,17 @@ def main():
 )
     model = base_model.to(device)
 
-    # Loss function and optimizer
     #criterion = nn.CrossEntropyLoss()
     #optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
     #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=10)
 
-    # Train the model
     #train_losses, val_losses, train_acc, val_acc = train_model(model, train_loader, val_loader, criterion, optimizer, epochs=10)
 
-    # Save the model
     torch.save(model.state_dict(), "models/efficientnet_b4_retinal.pth")
     print("Model saved as efficientnet_b4_retinal.pth")
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20):
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    #device = xm.xla_device()
     print("Training on: ", device)
     print("Trianing with: ", model)
     train_losses, val_losses = [], []
@@ -111,8 +95,6 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20
             loss.backward()
             optimizer.step()
 
-            #xm.optimizer_step(optimizer)
-
             running_loss += loss.item() * images.size(0)
             _, preds = torch.max(outputs, 1)
             correct += (preds == labels).sum().item()
@@ -122,7 +104,6 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=20
         train_acc.append(correct / total)
         train_losses.append(train_loss)
 
-        # Validation
         model.eval()
         val_loss, val_correct, val_total = 0.0, 0, 0
         with torch.no_grad():
@@ -148,10 +129,10 @@ def test_model(model, test_loader, criterion):
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     print("Testing on:", device)
 
-    model.eval()  # Set model to evaluation mode
+    model.eval()
     test_loss, test_correct, test_total = 0.0, 0, 0
 
-    with torch.no_grad():  # Disable gradient computation
+    with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
 
@@ -163,7 +144,6 @@ def test_model(model, test_loader, criterion):
             test_correct += (preds == labels).sum().item()
             test_total += labels.size(0)
 
-    # Calculate average loss and accuracy
     test_loss /= len(test_loader.dataset)
     test_accuracy = test_correct / test_total
 
@@ -174,8 +154,6 @@ def test_model(model, test_loader, criterion):
 if __name__ == "__main__":
     main()
 
-    # Load the trained model
     model.load_state_dict(torch.load("efficientnet_b4_retinal.pth"))
     
-    # Run the test loop
     test_loss, test_accuracy = test_model(model, test_loader, criterion)
