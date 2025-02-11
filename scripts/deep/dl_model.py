@@ -49,7 +49,7 @@ def main():
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-    train_dataset = datasets.ImageFolder(root=train_path, transform=traint_transform)
+    train_dataset = datasets.ImageFolder(root=train_path, transform=train_transform)
     val_dataset = datasets.ImageFolder(root=val_path, transform=test_transform)
     test_dataset = datasets.ImageFolder(root=test_path, transform=test_transform)
 
